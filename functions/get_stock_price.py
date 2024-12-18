@@ -18,7 +18,7 @@ def stock_price(stock_label = 'HDFCBANK'):
     # Send GET request
     try:
         response = requests.get(url, headers=headers)
-        print(response.status_code)
+        
         # print(response.content)
         if response.status_code == 200:
             # Parse the HTML content
@@ -30,7 +30,8 @@ def stock_price(stock_label = 'HDFCBANK'):
             
             figure = soup.find_all("div", class_="P6K39c")
             names = soup.find_all("div", class_ = "mfs7Fc")
-            
+            # print(figure)
+            # print(names)
             if ele_stock_pirce or figure or names:
                 stock_price = ele_stock_pirce.text
                 figure = [i.text for i in figure]

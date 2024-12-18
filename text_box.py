@@ -1,5 +1,6 @@
 import streamlit as st
 from functions.get_stock_price import stock_price
+from functions.urls import normalize_url
 from datetime import datetime, timezone, timedelta
 
 
@@ -7,6 +8,12 @@ from datetime import datetime, timezone, timedelta
 if 'title_shown' not in st.session_state:
     st.session_state['title_shown'] = True
 
+# Set the title of the webpage (browser tab)
+st.set_page_config(
+    page_title="RAGInvest",  # Title of the browser tab
+    page_icon="/home/meet.shingala/Downloads/RAGinvest.ico",                  # Optional: favicon icon for the tab
+    layout="centered"                # Layout: "centered" or "wide"
+)
 # Display text asking for stock code
 if st.session_state['title_shown']:
     st.title('Enter Stock Code')
@@ -15,8 +22,8 @@ if st.session_state['title_shown']:
 stock_code = st.text_input('Stock Code')
 
 # Create a sidebar with an image
-image_path = "/home/meet.shingala/Downloads/RAGinvest.webp"  # Replace with the path to your image file
-st.sidebar.image(image_path, use_container_width=True)
+st.session_state['image_path'] = "/home/meet.shingala/Downloads/RAGinvest.webp"  # Replace with the path to your image
+st.sidebar.image(st.session_state['image_path'], use_container_width=True)
 
 # Function to be called after entering the stock code
 def run_function(stock_code):
@@ -38,7 +45,6 @@ if st.button('Enter'):
         if function_output['code'] == 200 and function_output['Stock Price']:
             # st.write(function_output)
             try:
-
                 # Display the stock price and time with HTML for alignment
                 st.markdown(
                     f"""
@@ -56,16 +62,40 @@ if st.button('Enter'):
                     html = '''<div style="background-color:#f2f2f2;padding:20px;border-radius:10px;">
                     <h3>Stock Information</h3>
                     <table style="width:100%;">'''
+
                     for i in range(len(names)):
-                        html += f'''<tr>
+                        name = names[i].lower()
+                        # Convert the website to URL and provide anchor tag
+                        if name == "website":
+                            naive_url = str(figures[i])
+                            url = normalize_url(naive_url)
+                            html += f'''<tr>
                             <td style="font-weight:bold;">{str(names[i])}</td>
-                            <td style="text-align:right;">{str(figures[i])}</td>
-                            </tr>                            '''
+                            <td style="text-align:right;"><a href={url}>{naive_url}</a></td>
+                            </tr>                            '''    
+                        
+                        # provide a google search for the CEO
+                        elif name == "ceo":
+                            ceo = str(figures[i])
+                            ceo_url = ceo.replace(" ","%20")
+
+                            url = f"https://www.google.com/search?q={ceo_url}&hl=en"
+                            html += f'''<tr>
+                                <td style="font-weight:bold;">{str(names[i])}</td>
+                                <td style="text-align:right;"><a href={url}>{ceo}</a></td>
+                                </tr>                            '''
+                        # All the other field are treated normally
+                        else:
+                            html += f'''<tr>
+                                <td style="font-weight:bold;">{str(names[i])}</td>
+                                <td style="text-align:right;">{str(figures[i])}</td>
+                                </tr>                            '''
                     html += """</table></div>"""
-                    print(html)
+                    # print(html)
                     st.markdown(html, unsafe_allow_html=True)
             except Exception as e:
                 print(e)
+            
         if function_output['code'] == 310 and not function_output['Stock Price']:
             st.warning('The stock code seems faulty. Please check!')
 
