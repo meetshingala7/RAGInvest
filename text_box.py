@@ -1,5 +1,6 @@
 import streamlit as st
 from functions.get_stock_price import stock_price
+from datetime import datetime, timezone, timedelta
 
 
 # Set title of the web app
@@ -26,6 +27,10 @@ def run_function(stock_code):
 if st.button('Enter'):
     # Display the entered stock code when the button is pressed
     if stock_code:
+        ist_offset = timedelta(hours=5, minutes=30)
+        current_time = datetime.now(timezone.utc) + ist_offset
+        formatted_time = current_time.strftime("%d/%m/%Y %H:%M:%S.%f") + " +IST"
+
         st.write(f'You entered the stock code: {stock_code}')
         # Call the function and display its output
         function_output = stock_price(stock_code)
@@ -33,7 +38,17 @@ if st.button('Enter'):
         if function_output['code'] == 200 and function_output['Stock Price']:
             # st.write(function_output)
             try:
-                st.markdown(f"<h1>{function_output['Stock Price']}</h1>", unsafe_allow_html=True)
+
+                # Display the stock price and time with HTML for alignment
+                st.markdown(
+                    f"""
+                    <div style="text-align: left; margin-bottom: 0px; display: flex;">
+                        <h1 style="margin: 0; font-size: 2.5rem;">{function_output['Stock Price']}</h1><h5 style="position:absolute; bottom: -12px;"> {formatted_time}</h5>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+                # st.markdown(f"<h1>{function_output['Stock Price']}</h1>", unsafe_allow_html=True)
 
                 names = function_output['names']
                 figures = function_output['figure']
@@ -53,6 +68,7 @@ if st.button('Enter'):
                 print(e)
         if function_output['code'] == 310 and not function_output['Stock Price']:
             st.warning('The stock code seems faulty. Please check!')
+
 
     else:
         st.write('Please enter a stock code.')
