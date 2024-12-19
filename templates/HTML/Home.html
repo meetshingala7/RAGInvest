@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            background-color: #f2f2f2;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, table tr td {
+            border: 1px solid #ccc;
+        }
+        table tr td {
+            padding: 10px;
+            text-align: center;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-evenly;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .action-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #response-text {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Enter Stock Code</h1>
+    <form id="textForm">
+        <label for="inputText">Stock Code:</label>
+        <input type="text" id="inputText" name="text" required>
+        <button type="submit">Fetch</button>
+    </form>
+
+    <p id="responseMessage" style="margin-top: 20px;"></p>
+
+    <!-- <div class="display: flex;">
+        <h1 id="stock-price"></h1><h5 id="formatted-time"></h5>
+    </div> -->
+    <div style="margin-bottom: 0px; display: flex;">
+        <h1 style="margin: 0; font-size: 2.5rem;" id="stock-price"></h1><h5 style="padding-left: 5px;" id="formatted-time"></h5>
+    </div>
+
+    <div class="container" id="stock-info">
+        <!-- Stock information will be dynamically inserted here -->
+    </div>
+    <div class="buttons" id="stock-dates-buttons">
+    </div>
+    <div class="stock-charts" id = "stock-chart-xx-time">
+    </div>
+    <script>
+        document.getElementById('textForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent form submission from reloading the page
+
+            const inputText = document.getElementById('inputText').value;
+            const responseMessage = document.getElementById('responseMessage');
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/stock_info', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ stock_code: inputText })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Update stock price and time
+                document.getElementById('stock-price').innerText = inputText + " Value: " + data.stock_price;
+                document.getElementById('formatted-time').innerText = `on ${data.formatted_time}`;
+
+                // Update stock information
+                const stockInfoContainer = document.getElementById('stock-info');
+                let html = '<h3>Stock Information</h3><table>';
+
+                data.stock_details.forEach(item => {
+                    if (item.name.toLowerCase() === 'website') {
+                        html += `<tr>
+                                    <td style="font-weight:bold;">${item.name}</td>
+                                    <td style="text-align:center;"><a href="${item.value}" target="_blank">${item.value}</a></td>
+                                 </tr>`;
+                    } else if (item.name.toLowerCase() === 'ceo') {
+                        const ceoUrl = `https://www.google.com/search?q=${encodeURIComponent(item.value)}&hl=en`;
+                        html += `<tr>
+                                    <td style="font-weight:bold;">${item.name}</td>
+                                    <td style="text-align:center;"><a href="${ceoUrl}" target="_blank">${item.value}</a></td>
+                                 </tr>`;
+                    } else {
+                        html += `<tr>
+                                    <td style="font-weight:bold;">${item.name}</td>
+                                    <td style="text-align:center;">${item.value}</td>
+                                 </tr>`;
+                    }
+                });
+
+                html += '</table>';
+                stockInfoContainer.innerHTML = html;
+                let buttons = `<br>
+                <hr>
+                <h3 style="margin: 0; font-size: 2.5rem;">Stock Charts</h3>
+                <hr>
+                <div class="button-container">
+                    <button class="action-button" onclick="callAPI('1D');">1D</button>
+                    <button class="action-button" onclick="callAPI('5D');">5D</button>
+                    <button class="action-button" onclick="callAPI('1M');">1M</button>
+                    <button class="action-button" onclick="callAPI('3M');">3M</button>
+                    <button class="action-button" onclick="callAPI('6M');">6M</button>
+                    <button class="action-button" onclick="callAPI('1Y');">1Y</button>
+                    <button class="action-button" onclick="callAPI('3Y');">3Y</button>
+                    <button class="action-button" onclick="callAPI('5Y');">5Y</button>
+                </div>`;
+
+                const stockDatesButton = document.getElementById('stock-dates-buttons');
+                
+                stockDatesButton.innerHTML = buttons;
+
+                responseMessage.textContent = ''; // Clear any error messages
+            } catch (error) {
+                responseMessage.textContent = `Error: ${error.message}`;
+            }
+        });
+
+        async function callAPI(buttonId) {
+            console.log(buttonId);
+            
+            const response = await fetch(`http://127.0.0.1:5000/api/stock/chart`, {
+                method: 'POST', // or 'POST', depending on your API
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ time_duration : buttonId })
+            });
+
+            const data = response.json();
+            
+            const chartDiv = document.getElementById(`stock-chart-xx-time`);
+    
+            // Clear any previous content
+            chartDiv.innerHTML = 'The code works';
+
+            // Insert the image inside the div
+            const img = document.createElement('img');
+            img.src = data.image_url;  // Assuming the API returns a URL for the image
+            img.alt = `Chart for Time Duration ${buttonId}`;
+            img.width = 500;  // You can adjust the width or other properties if needed
+            chartDiv.appendChild(img);
+            
+        }
+
+    </script>
+</body>
+</html>
