@@ -28,7 +28,7 @@ def calculate_dates(time_duration):
     else:
         return_time = today - relativedelta(years = 5)
         
-    return return_time
+    return today, return_time
 
 if __name__ == "__main__":
     print(calculate_dates('1D'))

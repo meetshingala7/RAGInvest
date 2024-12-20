@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 
-def download_data(stock_symbol = 'RELIANCE', start_date = '2020-01-01', end_date = "2024-12-16"):
+def download_and_store_data(stock_symbol = 'RELIANCE', start_date = '2020-01-01', end_date = "2024-12-16"):
     stock_symbol = stock_symbol.upper()
     stock_symbol = f'{stock_symbol}.NS'
     # Fetch historical data

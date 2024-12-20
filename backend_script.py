@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify, render_template
 from datetime import datetime
 from functions.urls import normalize_url
+from functions.dates import calculate_dates
+from functions.data import download_and_store_data
 from functions.get_stock_price import stock_price
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -14,7 +17,20 @@ def home():
 def stock_chart():
     data = request.get_json()
     print(data)
-    return {"response": None}
+
+    stock_code = data['stock_code']
+    time_duration = data['time_duration']
+
+    start_date, end_date = calculate_dates(time_duration = time_duration)
+
+    # print('start_date, end_date',start_date, end_date)
+    path = download_and_store_data(stock_symbol = stock_code, start_date = start_date, end_date = end_date)
+    
+    # print('path', path)
+    
+
+
+
 
 
 @app.route('/api/stock_info', methods=['GET', 'POST'])
