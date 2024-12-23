@@ -7,23 +7,41 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <div id="myDiv" style="width: 50%; height: 50%;"></div>
+    <div id="myDiv" style="width: 100%; height: 100%;"></div>
     <script>
+
+    async function callAPI(inputText, buttonId) {
+
+        inputText = 'RELIANCE';
+        buttonId = '';
+
+        const response = await fetch(`http://127.0.0.1:5000/api/stock/chart`, {
+            method: 'POST', // or 'POST', depending on your API
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ stock_code: inputText , time_duration : buttonId })
+        });
+
+        const data1 = await response.json();
+
         var trace1 = {
-            x: [1, 2, 3, 4],
-            y: [10, 15, 13, 17],
+            x: data1['x_axis'],
+            y: data1['y_axis'],
             type: 'scatter'
         };
+        console.log(data1);
+        console.log(data1['x_axis']);
+        console.log(data1.x_axis);
+        console.log(data1['y_axis']);
+        console.log(data1.y_axis);
 
-        var trace2 = {
-            x: [1, 2, 3, 4],
-            y: [16, 5, 11, 9],
-            type: 'scatter'
-        };
-
-        var data = [trace1, trace2];
+        var data = [trace1];
 
         Plotly.newPlot('myDiv', data);
+    };
+
+    callAPI('RELIANCE', '');
     </script>
 </body>
 </html>
