@@ -74,6 +74,12 @@
     <div id="myDiv" style="width: 100%; height: 100%;"></div>
 
     <script>
+        let x = sessionStorage.getItem('userId');
+        console.log(x);
+        if (x == null) {
+            window.location.href = "/login";
+        }
+
         document.getElementById('textForm').addEventListener('submit', async function(event) {
             event.preventDefault(); // Prevent form submission from reloading the page
 

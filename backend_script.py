@@ -18,8 +18,13 @@ def registration():
     # Refers to the registration page
     return render_template('HTML/registration.html')
 
+@app.route('/login', methods = ['GET', 'POST'])
+def login():
+    # Refers to login page
+    return render_template('HTML/login.html')
 
-@app.route('/api/stock/chart', methods = ['GET', 'POST'])
+
+@app.route('/api/stock/chart', methods = ['POST'])
 def stock_chart():
     # Collect data from request
     data = request.get_json()
@@ -95,8 +100,8 @@ def stock_chart():
 
 
 
-@app.route('/api/stock_info', methods=['GET', 'POST'])
-def handle_text():
+@app.route('/api/stock_info', methods=['POST'])
+def stock_info():
     data = request.get_json()  # Parse JSON data from the request
     print(data)
     if not data or 'stock_code' not in data:
@@ -154,11 +159,15 @@ def validate_user():
 
     import psycopg2
     try:
+        from dotenv import load_dotenv, find_dotenv
+        import os
+        _ = load_dotenv(find_dotenv())
+
         conn = psycopg2.connect(
-            dbname = "postgres",
-            user = "postgres",
-            password = "secretpswd",
-            host = "localhost",
+            dbname = os.environ["PG_DB_NAME"],
+            user = os.environ["PG_DB_USER"],
+            password = os.environ["PG_DB_PSWD"],
+            host = os.environ["PG_DB_IP"],
             port = 5432
         )
 
@@ -246,7 +255,166 @@ def validate_user():
     except Exception as e:
         print(str(e))
 
+@app.route('/api/register', methods = ['POST'])
+def register():
 
+    required_keys = ['username','email','firstName','middleName','lastName','password']
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({'isValid': False,'error': 'The form details is required'}), 400
+        
+
+    missing_keys = required_keys - data.keys()
+    # print(missing_keys)
+    if missing_keys:
+        return jsonify({
+            "errors": "All the required keys are missing"
+        }), 400
+
+
+    import psycopg2
+    from psycopg2 import DatabaseError, IntegrityError
+    try:
+        from dotenv import load_dotenv, find_dotenv
+        import os
+        _ = load_dotenv(find_dotenv())
+
+        conn = psycopg2.connect(
+            dbname = os.environ["PG_DB_NAME"],
+            user = os.environ["PG_DB_USER"],
+            password = os.environ["PG_DB_PSWD"],
+            host = os.environ["PG_DB_IP"],
+            port = 5432
+        )
+
+        # Create a cursor
+        cur = conn.cursor()
+        query = """
+            INSERT INTO postgres.public.users(email_id, username, password, first_name, middle_name, last_name)
+            VALUES (%s,%s,%s,%s,%s,%s)
+            returning id;
+        """
+
+        entry_tuple = (data['email'], data['username'], data['password'], data['firstName'], data['middleName'], data['lastName'], )
+
+        cur.execute(query, entry_tuple)
+        inserted_id = cur.fetchone()[0]
+        
+        conn.commit()
+
+        return jsonify({"id", inserted_id, "errors", None}), 200
+        
+        
+    except IntegrityError as e:
+        # Handle Integrity Error
+        conn.rollback()
+        return jsonify({"errors": f"There was an integrity error in inserting registration form: {str(e)}"}), 500
+
+
+    except DatabaseError as e:
+        # Handle Database error
+        conn.rollback()
+        # print(str(e))
+        return jsonify({"errors": f"There was a database error in inserting registration form: {str(e)}"}), 500
+        
+        
+    except Exception as e:
+        # All generic errors
+        conn.rollback()
+        return jsonify({"errors": f"There was an error in inserting registration form: {str(e)}"}), 500
+        
+        
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+@app.route('/api/login', methods = ['POST'])
+def Login():
+    """
+    1st check 
+    """
+    data = request.get_json()
+    print(data)
+
+    if not data:
+        return jsonify({ "success" : True, 'error': 'The username and Email id is required'}), 400
+
+    if 'email' not in data.keys():
+        return jsonify({ "success" : False, "error" : "The email is not present" }), 400
+    email = data['email']
+
+    if 'password' not in data.keys():
+        return jsonify({ "success" : False, "error" : "The password is not present" }), 400
+    password = data['password']
+
+    import psycopg2
+    from psycopg2 import DatabaseError, IntegrityError
+    try:
+        from dotenv import load_dotenv, find_dotenv
+        import os
+        _ = load_dotenv(find_dotenv())
+
+        conn = psycopg2.connect(
+            dbname = os.environ["PG_DB_NAME"],
+            user = os.environ["PG_DB_USER"],
+            password = os.environ["PG_DB_PSWD"],
+            host = os.environ["PG_DB_IP"],
+            port = 5432
+        )
+
+        # Create a cursor
+        cur = conn.cursor()
+
+        query = """
+        SELECT
+            password,
+            id
+        FROM
+            postgres.public.users
+        WHERE
+            email_id = %s;
+        """
+
+        cur.execute(query, (email, ))
+
+        pswd = cur.fetchone()
+        print(pswd)
+        cur.close()
+        conn.close()
+
+        if not pswd:
+            # No email
+            return jsonify({
+                "success" : False,
+                "error" : "EMAIL_NOT_FOUND",
+                "message" : "Email not registered"
+            }), 404
+        if pswd[0] == password:
+            # Password does match
+            return jsonify({
+                "success" : True,
+                "error" : None,
+                "message" : "Password matches",
+                "token" : pswd[1]
+            }), 200
+        else:
+            # Password does not match
+            return jsonify({
+                "success" : False,
+                "error" : "INVALID_PASSWORD",
+                "message" : "Invalid password"
+            }), 401
+    
+    except Exception as e:
+        return jsonify({
+            "success" : False,
+            "error" : "INTERNAL_SERVER_ERROR",
+            "message" : "Internal Server Error"
+        }), 500
 
 
 if __name__ == '__main__':

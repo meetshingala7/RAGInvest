@@ -29,3 +29,15 @@ Password: < Enter Your password ><br>
 <!-- <br> -->
 <!-- <br> -->
 Connect using DBeaver or PgAdmin
+<br>
+To run logstash's docker compose file<br>
+<code>cd logstash/<br>
+docker compose up<br>
+docker ps
+</code><br>
+You should have 3 new containers running:
+<ol>
+<li>Kibana</li>
+<li>ElasticSearch</li>
+<li>Logstash</li>
+</ol>

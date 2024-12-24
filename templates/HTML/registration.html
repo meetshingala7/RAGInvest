@@ -115,6 +115,7 @@
     </div>
 
     <script>
+        
         const form = document.getElementById('signupForm');
         const usernameError = document.getElementById('username-error');
         const emailError = document.getElementById('email-error');
@@ -167,12 +168,15 @@
                     body: JSON.stringify(data),
                 });
                 
-                if (registrationResponse.ok) {
+                const registrationResult = await registrationResponse.json(); 
+                console.log()
+                if (!registrationResponse.errors) {
+                    
                     alert('Registration successful!');
                     form.reset();
+                    window.location.href = '/login';
                 } else {
-                    const errorData = await registrationResponse.json();
-                    alert(errorData.message || 'Registration failed. Please try again.');
+                    alert(registrationResult.errors || 'Registration failed. Please try again.');
                 }
             } catch (error) {
                 console.error('Error:', error);
