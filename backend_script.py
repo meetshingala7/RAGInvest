@@ -377,6 +377,7 @@ def Login():
             postgres.public.users
         WHERE
             email_id = %s;
+        
         """
 
         cur.execute(query, (email, ))
@@ -415,7 +416,7 @@ def Login():
             "error" : "INTERNAL_SERVER_ERROR",
             "message" : "Internal Server Error"
         }), 500
-
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
