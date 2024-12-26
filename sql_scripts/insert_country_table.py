@@ -30,7 +30,7 @@ print('2')
 
 def insert_country_lat_lon(val):
     print(val)
-    country = val['country']
+    country = val['name']
     latitude = val['latitude']
     longitude = val['longitude']
     if country and latitude and longitude:
