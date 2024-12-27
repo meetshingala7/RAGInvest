@@ -5,34 +5,54 @@ import requests as request
 import time
 
 
-def insert_rest_details(val):
+def insert_rest_details(val, cur):
     print(val)
-    API = f"https://restcountries.com/v3.1/name/{val}"
-    response = request.get(API)
-    rest_country_data = response.json()
+    try:
+        API = f"https://restcountries.com/v3.1/name/{val}"
+        response = request.get(API)
+        rest_country_data = response.json()
 
-    alpha2_code = rest_country_data[0]['cca2'] # String
-    alpha3_code = rest_country_data[0]['cca3'] # String
-    currency_code = list(rest_country_data[0]['currencies'].keys())[0] # String
-    currency_name = list((rest_country_data[0]['currencies'].values()))[0]['name'] # String
-    capital = rest_country_data[0]['capital'][0] # String
-    continent = rest_country_data[0]['region'] # String
-    region = rest_country_data[0]['subregion'] # String
-    population = rest_country_data[0]['population'] # Integer
-    timezones = rest_country_data[0]['timezones'] # List
+        alpha2_code = rest_country_data[0]['cca2'] # String
+        alpha3_code = rest_country_data[0]['cca3'] # String
+        currency_code = list(rest_country_data[0]['currencies'].keys())[0] # String
+        currency_name = list((rest_country_data[0]['currencies'].values()))[0]['name'] # String
+        capital = rest_country_data[0]['capital'][0] # String
+        continent = rest_country_data[0]['region'] # String
+        region = rest_country_data[0]['subregion'] # String
+        population = rest_country_data[0]['population'] # Integer
+        timezones = rest_country_data[0]['timezones'] # List
 
-    # if country and latitude and longitude:
-    query = """
-    INSERT INTO country 
-        (Alpha2_code, Alpha3_code, Continent, Region, Capital, Population, Currency_code, Currency_Name, Time_Zones) 
-    VALUES 
-        (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """
-    cur.execute(query, (alpha2_code, alpha3_code, continent, region, capital, population, currency_code, currency_name, timezones))
-    conn.commit()
-    print(val)
-    return None
-
+        # if country and latitude and longitude:
+        query = """
+        UPDATE country
+        SET 
+            Alpha2_code = %s, 
+            Alpha3_code = %s, 
+            Continent = %s, 
+            Region = %s, 
+            Capital = %s, 
+            Population = %s, 
+            Currency_code = %s, 
+            Currency_Name = %s, 
+            Time_Zones = %s 
+        WHERE
+            Country_Name = %s;"""
+        cur.execute(query, (alpha2_code, alpha3_code, continent, region, capital, population, currency_code, currency_name, timezones, val))
+        conn.commit()
+        
+        return None
+    except Exception as e:
+        print(str(e))
+        query = """
+        INSERT INTO CountryLogs
+            (CountryName, StatusCode, Cca2Code, error_message)
+        VALUES
+            (%s, %s, %s, %s)
+        """
+        
+        cur.execute(query, (val, response.status_code, None, str(e)))
+        print(val, response.status_code, str(e))
+        return val
 
 
 if __name__ == "__main__":
@@ -59,7 +79,7 @@ if __name__ == "__main__":
     cur.execute(query)
     rows = cur.fetchall()
     for row in rows:
-        insert_rest_details(row[0])
+        insert_rest_details(row[0], cur)
         time.sleep(2)
 
     if cur:
