@@ -6,11 +6,13 @@ CREATE TABLE users (
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     first_name VARCHAR(255) NOT NULL,
-    middle_name VARCHAR(255), 
+    middle_name VARCHAR(255),
     last_name VARCHAR(255) NOT NULL,
+    country_id UUID,
     valid_from TIMESTAMP DEFAULT NOW(),
     is_valid BOOLEAN DEFAULT TRUE,
     valid_to TIMESTAMP DEFAULT '9999-12-31 23:59:59'
+    FOREIGN KEY (country_id) REFERENCES Country(CountryId)
 );
 
 CREATE OR REPLACE FUNCTION update_valid_to() 
