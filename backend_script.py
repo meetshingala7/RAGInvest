@@ -5,6 +5,7 @@ from functions.dates import calculate_dates
 from functions.data import download_and_store_data
 from functions.get_stock_price import stock_price
 import pandas as pd
+import json
 
 app = Flask(__name__)
 
@@ -23,6 +24,16 @@ def login():
     # Refers to login page
     return render_template('HTML/login.html')
 
+@app.route('/api/countries', methods = ['GET'])
+def countries():
+    try:
+        with open('countries.json') as f:
+            countries_data = json.load(f)
+        # return jsonify(countries_data)
+        return jsonify(countries_data), 200
+    except Exception as e:
+        print(str(e))
+        return jsonify({'error': f'Error in fetching countries: {str(e)}'}), 500
 
 @app.route('/api/stock/chart', methods = ['POST'])
 def stock_chart():
