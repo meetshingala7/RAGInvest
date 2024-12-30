@@ -8,6 +8,8 @@ import time
 def insert_rest_details(val, cur):
     print(val)
     try:
+        alpha2_code = ''
+        response = ''
         API = f"https://restcountries.com/v3.1/name/{val}"
         response = request.get(API)
         rest_country_data = response.json()
@@ -50,7 +52,10 @@ def insert_rest_details(val, cur):
             (%s, %s, %s, %s)
         """
         
-        cur.execute(query, (val, response.status_code, None, str(e)))
+        if alpha2_code:
+            cur.execute(query, (val, response.status_code, alpha2_code, str(e)))
+        else:
+            cur.execute(query, (val, response.status_code, None, str(e)))
         print(val, response.status_code, str(e))
         return val
 
@@ -80,7 +85,7 @@ if __name__ == "__main__":
     rows = cur.fetchall()
     for row in rows:
         insert_rest_details(row[0], cur)
-        time.sleep(2)
+        time.sleep(1)
 
     if cur:
         cur.close()
