@@ -3,181 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Information</title>
+    <title>Stock Information Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
         }
-        .container {
-            background-color: #f2f2f2;
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            background-color: #2c3e50;
+            padding: 1rem;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-logo {
+            height: 40px;
+            margin-right: 20px;
+        }
+
+        .nav-button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            border-radius: 5px;
+        }
+
+        .nav-button:hover {
+            background-color: #34495e;
+        }
+
+        .nav-right {
+            margin-left: auto;
+            position: relative;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            width: 200px;
+            z-index: 1000;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown button {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .profile-dropdown button:hover {
+            background-color: #f5f5f5;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            border-radius: 10px;
         }
-        table {
+
+        .search-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #2c3e50;
+        }
+
+        .search-button {
+            padding: 12px 30px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .search-button:hover {
+            background-color: #34495e;
+        }
+
+        .content-wrapper {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .side-panel {
+            flex: 0 0 300px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-panel {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stock-info-table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
-        table, table tr td {
-            border: 1px solid #ccc;
+
+        .stock-info-table td {
+            padding: 12px;
+            border: 1px solid #eee;
         }
-        table tr td {
-            padding: 10px;
-            text-align: center;
+
+        .stock-info-table tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
-        .button-container {
+
+        .chart-controls {
             display: flex;
-            justify-content: space-evenly;
-            width: 100%;
+            gap: 10px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .action-button {
-            padding: 10px 20px;
-            font-size: 16px;
+        .time-button {
+            padding: 8px 16px;
+            border: none;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
             cursor: pointer;
+            transition: all 0.3s;
         }
 
-        #response-text {
+        .time-button:hover {
+            background-color: #34495e;
+            transform: translateY(-2px);
+        }
+
+        #responseMessage {
+            color: #ff4444;
             text-align: center;
-            font-size: 18px;
-            font-weight: bold;
+            margin: 10px 0;
         }
 
+        .stock-price {
+            font-size: 2.5rem;
+            margin: 0;
+            color: #2c3e50;
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .stock-time {
+            font-size: 0.9rem;
+            color: #666;
+        }
     </style>
 </head>
 <body>
-    <h1>Enter Stock Code</h1>
-    <form id="textForm">
-        <label for="inputText">Stock Code:</label>
-        <input type="text" id="inputText" name="text" required>
-        <button type="submit">Fetch</button>
-    </form>
+    <nav class="navbar">
+        <img src="../../static/images/RAGinvest.png" alt="Logo" class="nav-logo">
+        <button class="nav-button">Home</button>
+        <button class="nav-button">Watchlist</button>
+        <div class="nav-right">
+            <button class="nav-button" onclick="toggleProfileMenu()">Profile</button>
+            <div class="profile-dropdown" id="profileDropdown">
+                <button onclick="location.href='/manage-profile'">Manage Profile</button>
+                <button onclick="location.href='/view-profile'">View Profile</button>
+                <button onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+    </nav>
 
-    <p id="responseMessage" style="margin-top: 20px;"></p>
+    <div class="main-container">
+        <div class="search-container">
+            <h2>Stock Information</h2>
+            <form id="searchForm" class="search-form">
+                <input type="text" id="stockInput" required class="search-input" placeholder="Enter stock code...">
+                <button type="submit" class="search-button">Search</button>
+            </form>
+            <p id="responseMessage"></p>
+        </div>
 
-    <!-- <div class="display: flex;">
-        <h1 id="stock-price"></h1><h5 id="formatted-time"></h5>
-    </div> -->
-    <div style="margin-bottom: 0px; display: flex;">
-        <h1 style="margin: 0; font-size: 2.5rem;" id="stock-price"></h1><h5 style="padding-left: 5px;" id="formatted-time"></h5>
+        <div class="content-wrapper">
+            <div class="side-panel">
+                <div id="stockDetails"></div>
+            </div>
+            <div class="main-panel">
+                <div class="stock-price">
+                    <span id="currentPrice"></span>
+                    <span class="stock-time" id="lastUpdate"></span>
+                </div>
+                <div class="chart-controls" id="timeControls"></div>
+                <div id="stockChart" style="width: 100%; height: 500px;"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="container" id="stock-info">
-        <!-- Stock information will be dynamically inserted here -->
-    </div>
-    <div class="buttons" id="stock-dates-buttons">
-    </div>
-    <div class="stock-charts" id = "stock-chart-xx-time">
-    </div>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <div id="myDiv" style="width: 100%; height: 100%;"></div>
-
     <script>
-        let x = sessionStorage.getItem('userId');
-        console.log(x);
-        if (x == null) {
+        // Session check
+        function checkSession() {
+            const userId = sessionStorage.getItem('userId');
+            if (!userId) {
+                window.location.href = "/login";
+            }
+        }
+        checkSession();
+
+        // Profile dropdown
+        function toggleProfileMenu() {
+            document.getElementById('profileDropdown').classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(event) {
+            if (!event.target.matches('.nav-button')) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        function handleLogout() {
+            sessionStorage.removeItem('userId');
             window.location.href = "/login";
         }
 
-        document.getElementById('textForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent form submission from reloading the page
+        // Stock search and display
+        document.getElementById('searchForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const stockCode = document.getElementById('stockInput').value;
+            await fetchStockInfo(stockCode);
+        });
 
-            const inputText = document.getElementById('inputText').value;
-            const responseMessage = document.getElementById('responseMessage');
-
+        async function fetchStockInfo(stockCode) {
             try {
                 const response = await fetch('http://127.0.0.1:5000/api/stock_info', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ stock_code: inputText })
+                    body: JSON.stringify({ stock_code: stockCode })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    throw new Error('Stock not found');
                 }
 
                 const data = await response.json();
+                displayStockInfo(data, stockCode);
+                setupTimeControls(stockCode);
+                document.getElementById('responseMessage').textContent = '';
+            } catch (error) {
+                document.getElementById('responseMessage').textContent = error.message;
+            }
+        }
 
-                // Update stock price and time
-                document.getElementById('stock-price').innerText = inputText + " Value: " + data.stock_price;
-                document.getElementById('formatted-time').innerText = `on ${data.formatted_time}`;
+        function displayStockInfo(data, stockCode) {
+            const stockDetails = document.getElementById('stockDetails');
+            let html = '<table class="stock-info-table">';
+            
+            data.stock_details.forEach(item => {
+                if (item.name.toLowerCase() === 'website') {
+                    html += `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td><a href="https://www.${item.value}" target="_blank">${item.value}</a></td>
+                        </tr>`;
+                } else if (item.name.toLowerCase() === 'ceo') {
+                    const ceoUrl = `https://www.google.com/search?q=${encodeURIComponent(item.value)}`;
+                    html += `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td><a href="${ceoUrl}" target="_blank">${item.value}</a></td>
+                        </tr>`;
+                } else {
+                    html += `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>${item.value}</td>
+                        </tr>`;
+                }
+            });
+            
+            html += '</table>';
+            stockDetails.innerHTML = html;
+        }
 
-                // Update stock information
-                const stockInfoContainer = document.getElementById('stock-info');
-                let html = '<h3>Stock Information</h3><table>';
+        function setupTimeControls(stockCode) {
+            const timeFrames = ['5D', '1M', '3M', '6M', '1Y', '3Y', '5Y'];
+            const controls = document.getElementById('timeControls');
+            
+            controls.innerHTML = timeFrames.map(time => `
+                <button class="time-button" onclick="fetchStockChart('${stockCode}', '${time}')">
+                    ${time}
+                </button>
+            `).join('');
+            
+            // Fetch default timeframe
+            fetchStockChart(stockCode, '1M');
+        }
 
-                data.stock_details.forEach(item => {
-                    if (item.name.toLowerCase() === 'website') {
-                        html += `<tr>
-                                    <td style="font-weight:bold;">${item.name}</td>
-                                    <td style="text-align:center;"><a href="${item.value}" target="_blank">${item.value}</a></td>
-                                 </tr>`;
-                    } else if (item.name.toLowerCase() === 'ceo') {
-                        const ceoUrl = `https://www.google.com/search?q=${encodeURIComponent(item.value)}&hl=en`;
-                        html += `<tr>
-                                    <td style="font-weight:bold;">${item.name}</td>
-                                    <td style="text-align:center;"><a href="${ceoUrl}" target="_blank">${item.value}</a></td>
-                                 </tr>`;
-                    } else {
-                        html += `<tr>
-                                    <td style="font-weight:bold;">${item.name}</td>
-                                    <td style="text-align:center;">${item.value}</td>
-                                 </tr>`;
-                    }
+        async function fetchStockChart(stockCode, timeFrame) {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/stock/chart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        stock_code: stockCode,
+                        time_duration: timeFrame
+                    })
                 });
 
-                html += '</table>';
-                stockInfoContainer.innerHTML = html;
-                let buttons = `<br>
-                <hr>
-                <h3 style="margin: 0; font-size: 2.5rem;">Stock Charts</h3>
-                <hr>
-                <div class="button-container">
-                    <button class="action-button" onclick="callAPI('${inputText}','5D');">5D</button>
-                    <button class="action-button" onclick="callAPI('${inputText}','1M');">1M</button>
-                    <button class="action-button" onclick="callAPI('${inputText}','3M');">3M</button>
-                    <button class="action-button" onclick="callAPI('${inputText}','6M');">6M</button>
-                    <button class="action-button" onclick="callAPI('${inputText}','1Y');">1Y</button>
-                    <button class="action-button" onclick="callAPI('${inputText}','3Y');">3Y</button>
-                    <button class="action-button" onclick="callAPI('${inputText}','5Y');">5Y</button>
-                </div>`;
+                if (!response.ok) {
+                    throw new Error('Failed to fetch chart data');
+                }
 
-                const stockDatesButton = document.getElementById('stock-dates-buttons');
-                
-                stockDatesButton.innerHTML = buttons;
-
-                responseMessage.textContent = ''; // Clear any error messages
+                const data = await response.json();
+                displayChart(data);
             } catch (error) {
-                responseMessage.textContent = `Error: ${error.message}`;
+                console.error('Error fetching chart:', error);
             }
-        });
+        }
 
-        async function callAPI(inputText, buttonId) {
+        function displayChart(data) {
+            const trace = {
+                x: data.x_axis,
+                y: data.y_axis,
+                type: 'scatter',
+                line: {
+                    color: '#2c3e50',
+                    width: 2
+                }
+            };
 
-            const response = await fetch(`http://127.0.0.1:5000/api/stock/chart`, {
-                method: 'POST', // or 'POST', depending on your API
-                headers: {
-                    'Content-Type': 'application/json',
+            const layout = {
+                margin: { t: 20, r: 20, b: 40, l: 40 },
+                xaxis: {
+                    showgrid: true,
+                    gridcolor: '#eee'
                 },
-                body: JSON.stringify({ stock_code: inputText , time_duration : buttonId })
-            });
-
-            const data1 = await response.json();
-
-            var trace1 = {
-                x: data1['x_axis'],
-                y: data1['y_axis'],
-                type: 'scatter'
-            };
-            
-            var data = [trace1];
-
-            Plotly.newPlot('myDiv', data);
+                yaxis: {
+                    showgrid: true,
+                    gridcolor: '#eee'
+                },
+                plot_bgcolor: 'white',
+                paper_bgcolor: 'white'
             };
 
+            Plotly.newPlot('stockChart', [trace], layout);
+        }
     </script>
 </body>
 </html>
