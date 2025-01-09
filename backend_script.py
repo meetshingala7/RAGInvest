@@ -24,6 +24,11 @@ def login():
     # Refers to login page
     return render_template('HTML/login.html')
 
+@app.route('/sample', methods = ['GET', 'POST'])
+def sample():
+    return render_template('HTML/sample.html')
+
+
 @app.route('/api/countries', methods = ['GET'])
 def countries():
     try:
