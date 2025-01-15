@@ -10,8 +10,8 @@ UPDATE
 SET
 	country_name = 'Congo'
 WHERE
-	country_name ILIKE 'Congo [%';
-
+	country_name ILIKE 'Congo [R%';
+SELECT * FROM country WHERE country_name ILIKE 'Congo [%';
 UPDATE
 	country
 SET

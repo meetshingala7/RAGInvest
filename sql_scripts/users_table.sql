@@ -11,7 +11,7 @@ CREATE TABLE users (
     country_id UUID,
     valid_from TIMESTAMP DEFAULT NOW(),
     is_valid BOOLEAN DEFAULT TRUE,
-    valid_to TIMESTAMP DEFAULT '9999-12-31 23:59:59'
+    valid_to TIMESTAMP DEFAULT '9999-12-31 23:59:59',
     FOREIGN KEY (country_id) REFERENCES Country(CountryId)
 );
 
@@ -33,7 +33,7 @@ BEFORE INSERT ON users
 FOR EACH ROW
 EXECUTE FUNCTION update_valid_to();
 
-INSERT INTO users(email_id, username, password, first_name, middle_name, last_name)
-VALUES ('meetshingala2024@gmail.com', 'meet.shingala', 'meet1234', 'Meet', 'Chetankumar', 'Shingala');
+INSERT INTO users(email_id, country_id,username, password, first_name, middle_name, last_name)
+VALUES ('meetshingala2024@gmail.com', '19ae766d-dcf5-41fd-858b-3a286b513fc3','meet.shingala', 'meet1234', 'Meet', 'Chetankumar', 'Shingala');
 
 SELECT * FROM users limit 5;
