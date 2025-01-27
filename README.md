@@ -1,43 +1,33 @@
 # RAGInvest
 
-<h4>To setup all the airflow components run:</h4>
-
-<code>echo -e "AIRFLOW_UID=$(id -u)" > .env
-<br>AIRFLOW_UID=50000
-<br>docker-compose up airflow-init
-<br>docker-compose up
-<br>docker ps
-</code>
-<br>
-Search for localhost:8080<br>
-Username: < Enter Your username ><br>
-Password: < Enter Your password ><br>
-
-<h4>To setup PostGreSQL DB</h4>
-<code>docker run --name postgresQL -p 5432:5432 -e POSTGRES_PASSWORD=< enter your password> -d postgres
-</code>
-<ul>
-<li>-p for port</li>
-<li>-d for detached</li>
-<li>-e for Environment Variables</li>
-<li>postgresQL - Name of Container (Can be of your choice)</li>
-<li>postgres - Image (Do not change)</li>
-<li>username: postgres</li>
-<li>database: postgres</li>
-<li>host: localhost</li>
-</ul>
-<!-- <br> -->
-<!-- <br> -->
-Connect using DBeaver or PgAdmin
-<br>
-To run logstash's docker compose file<br>
-<code>cd logstash/<br>
-docker compose up<br>
-docker ps
-</code><br>
-You should have 3 new containers running:
+## Project Objectives
+<p>The platform is intended for investors to be able to get an overview of a stock information, news and allow the investors to query from the news articles on the platform for stocks listed in the NSE index on the Indian Stock market.<br></p>
+The features that are proposed / being implemented are as follows:
 <ol>
-<li>Kibana</li>
-<li>ElasticSearch</li>
-<li>Logstash</li>
+<li>Provide Registration Page for new users.</li>
+<li>Provide a Login Page for existing users.</li>
+<li>Home Page where the User can search for the Information, News and Latest Stock Price of the stock.</li>
+<li>Extract the news from the web across various sources and displayed as per the search of the investor. Perform an hourly search across the internet for new articles to keep the investor updated.</li>
+<li>Allow the investor to store their watchlist.</li>
+<li>Apply Role based Access to provide Admin to assign certain stocks to Analysts as part of their watchlists in the portal.</li>
+<li>Provide the investors a RAG based system which allows them to query from the news articles collected by the system.</li>
+<!-- <li></li> -->
+<!-- <li></li> -->
+<!-- <li></li> -->
+<!-- <li></li> -->
 </ol>
+
+<br>
+<p>The domains that are being covered as part of the project are:</p>
+<ol>
+<li>Web Scraping - Scrapy and BeautifulSoup</li>
+<li>Orchestration - Airflow</li>
+<li>OLTP Systems - PostgreSQL</li>
+<li>Retrieval Augmented Generation - OpenAI API and PgVector</li>
+<li>Vector Databases - PgVector</li>
+<!-- <li></li> -->
+</ol>
+<br>
+
+
+
