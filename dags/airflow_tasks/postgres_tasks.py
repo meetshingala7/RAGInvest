@@ -19,7 +19,7 @@ def fetch_latest_entries(ti):
         query = """
         SELECT 
             * 
-        FROM 
+        FROM
             stock_information
         """
         curr.execute(query)
